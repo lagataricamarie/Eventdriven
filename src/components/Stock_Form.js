@@ -1,8 +1,18 @@
 import React, { useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 
 const Stock_Form = ({ products, onUpdateStock }) => {
+  const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState('');
   const [newStock, setNewStock] = useState('');
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+
+  const handleShowModal = () => {
+    setShowModal(true);
+    setUpdateSuccess(false); // Reset success message when modal opens
+  };
+
+  const handleCloseModal = () => setShowModal(false);
 
   const change_product = (e) => {
     setSelectedProduct(e.target.value);
@@ -19,35 +29,51 @@ const Stock_Form = ({ products, onUpdateStock }) => {
 
     if (product) {
       onUpdateStock(product.id, parseInt(newStock, 10));
+      setUpdateSuccess(true); // Set success message to true after update
     }
 
     setSelectedProduct('');
     setNewStock('');
+    // Close the modal after submitting (with a delay for displaying the success message)
+    setTimeout(() => {
+      setShowModal(false);
+    }, 500);
   };
-
   return (
-    <form onSubmit={form_submit}>
-      <label>Product:</label>
-      <select value={selectedProduct} onChange={change_product}>
-        <option value="" disabled>Select a product</option>
-        {products.map((product) => (
-          <option key={product.id} value={product.id}>
-            {product.name}
-          </option>
-        ))}
-      </select>
+    <>
+    <Button onClick={handleShowModal}>Update Stock</Button>
 
-      <label>New Stock:</label>
-      <input
-        type="number"
-        name="newStock"
-        value={newStock}
-        onChange={change_stock}
-      />
+    <Modal show={showModal} onHide={handleCloseModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>Update Stock</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <form onSubmit={form_submit}>
+          <label>Product:</label>
+          <select value={selectedProduct} onChange={change_product}>
+            <option value="" disabled>Select a product</option>
+            {products.map((product) => (
+              <option key={product.id} value={product.id}>
+                {product.name}
+              </option>
+            ))}
+          </select>
 
-      <button type="submit">Update Stock</button>
-    </form>
-  );
+          <label>New Stock:</label>
+          <input
+            type="number"
+            name="newStock"
+            value={newStock}
+            onChange={change_stock}
+          />
+
+          <Button type="submit">Update Stock</Button>
+          {updateSuccess && <p className="mt-2">Updated successfully!</p>}
+        </form>
+      </Modal.Body>
+    </Modal>
+  </>
+);
 };
 export default Stock_Form;
 

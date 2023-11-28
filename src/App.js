@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Product_Form from './components/Product_Form';
 import Product_List from './components/Product_List';
 import Category_Form from './components/Category_Form';
-import Category_List from './components/Category_List';
 import Stock_Form from './components/Stock_Form';
 import Stock_List from './components/Stock_List';
 import TransactionManagement from './components/TransacManagement';
+import Category_List from './components/Category_List';
 
 const App = () => {
   const [products, setProducts] = useState(() => {
@@ -83,15 +83,15 @@ const App = () => {
           <h1>GizmoGlitz</h1>
           <nav>
             <button onClick={() => setActiveTab('products')}>Products</button>
-            <button onClick={() => setActiveTab('categories')}>Categories</button>
             <button onClick={() => setActiveTab('stocks')}>Stocks</button>
             <button onClick={() => setActiveTab('transaction')}>Transaction</button>
+            <button onClick={() => setActiveTab('reports')}>Reports</button>
           </nav>
         </div>
       </header>
 
       <div className="container">
-        {activeTab === 'categories' && (
+        {activeTab === 'products' && (
           <div>
             <h2>Product Management</h2>
             <Category_Form onSubmit={add_category} />
@@ -124,7 +124,9 @@ const App = () => {
          {activeTab === 'transaction' && (
           <div>
             <h2>Transaction Management</h2>
-            <TransactionManagement products={products} handleAddToCart={handleAddToCart} />
+            <TransactionManagement products={products}  setProducts={setProducts}  />
+            <TransactionManagement handleAddToCart={handleAddToCart}  />
+
           </div>
         )}
       </div>

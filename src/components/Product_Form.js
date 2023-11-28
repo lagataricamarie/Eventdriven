@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 
 const Product_Form = ({ onSubmit, categories }) => {
   const [product, setProduct] = useState({
@@ -8,9 +9,18 @@ const Product_Form = ({ onSubmit, categories }) => {
     stock: '',
     category: '',
   });
+  const [showModal, setShowModal] = useState(false);
+  const [SuccessMessage, setSuccessMessage] = useState(false);
 
   useEffect(() => {
   }, []);
+  
+  const handleShowModal = () => {
+    setShowModal(true);
+    setSuccessMessage(false); // Reset success message when modal opens
+  };
+
+  const handleCloseModal = () => setShowModal(false);
 
   const input_change = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
@@ -20,11 +30,23 @@ const Product_Form = ({ onSubmit, categories }) => {
     e.preventDefault();
     onSubmit(product);
     setProduct({ id: '', name: '', price: '', stock: '', category: '' });
+    setSuccessMessage(true); // Show success message after submission
+    setTimeout(() => {
+      setSuccessMessage(false); // Hide the success message after a delay
+      handleCloseModal(); // Close the modal after hiding the message
+    }, 500); // Adjust the duration as needed
   };
 
+
   return (
-    <form onSubmit={form_submit}>
-      <h3>Add Product</h3>
+    <>
+    <Button class="mt-4 btn btn-primary " onClick={handleShowModal}>Add +</Button>
+    <Modal show={showModal} onHide={handleCloseModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add Product</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <form onSubmit={form_submit}>
       <label>Name:</label>
       <input
         type="text"
@@ -69,7 +91,14 @@ const Product_Form = ({ onSubmit, categories }) => {
 
       <button type="submit">Add</button>
     </form>
+    {SuccessMessage && (
+          <p style={{ color: 'green' }}>Product added successfully!</p>
+        )}
+      </Modal.Body>
+    </Modal>
+    </>
   );
 };
+
 
 export default Product_Form;

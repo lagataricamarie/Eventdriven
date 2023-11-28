@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const TransactionManagement = ({ products }) => {
+const TransactionManagement = ({ products = [], setProducts }) => {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
   const [showPaymentOptions, setShowPaymentOptions] = useState(false);
@@ -12,7 +12,8 @@ const TransactionManagement = ({ products }) => {
     contactNumber: ''
   });
 
-
+  const availableProducts = products.filter(product => product.stock > 0);
+  
   const addToCart = (productId) => {
     const productToAdd = products.find(product => product.id === productId);
     if (productToAdd) {
@@ -46,13 +47,35 @@ const TransactionManagement = ({ products }) => {
     // setProducts(updatedProducts); // You'd have this function in your ProductManagement component
   };
 
+  
+
   const handleCheckout = () => {
     if (cart.length === 0) {
       alert('Please add products to the cart before checking out!');
     } else {
-      setShowPaymentOptions(true); // Display payment options after checkout
+      // Calculate total price, update cart and other operations...
+
+      // Update stock for purchased products
+      if (Array.isArray(products) && products.length > 0) {
+        const updatedProducts = products.map(product => {
+          const cartProduct = cart.find(cartItem => cartItem.id === product.id);
+          if (cartProduct) {
+            const remainingStock = product.stock - 1; // Reduce by 1 for each purchased item
+            return { ...product, stock: remainingStock >= 0 ? remainingStock : 0 };
+          }
+          return product;
+        });
+
+        // Update the products list with reduced stock
+        setProducts(updatedProducts);
+        setCart([]); // Clear the cart after checkout
+        setShowPaymentOptions(true); // Display payment options after checkout
+      } else {
+        console.error('Products array is not properly initialized or empty.');
+      }
     }
   };
+
 
   const handlePaymentSelection = (paymentType) => {
     setShowPaymentOptions(true); 
@@ -221,14 +244,16 @@ const TransactionManagement = ({ products }) => {
             <tr>
               <th>Product</th>
               <th>Price</th>
+              <th>Stock</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody>
-            {products.map(product => (
+            {availableProducts.map(product => (
               <tr key={product.id}>
                 <td>{product.name}</td>
                 <td>${product.price}</td>
+                <td>{product.stock}</td>
                 <td>
                   <button onClick={() => addToCart(product.id)}>Add to Cart</button>
                 </td>

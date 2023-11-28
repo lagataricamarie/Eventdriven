@@ -1,19 +1,35 @@
 import React, { useState } from 'react';
+import { Modal } from 'react-bootstrap';
 
 const Category_List = ({ categories, onDelete, onUpdate }) => {
+  const [showModal, setShowModal] = useState(false);
   const [editCategory, setEditCategory] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
 
-const edit_category = (category) => {
+  const handleShowModal = (category) => {
+    setShowModal(true);
     setEditCategory(category);
-    setNewCategoryName(category);
+    setNewCategoryName(category); // Initialize the input with the current category name
   };
 
-  const update_category = () => {
-    onUpdate(editCategory, newCategoryName);
+  const handleCloseModal = () => {
+    setShowModal(false);
     setEditCategory('');
     setNewCategoryName('');
   };
+
+  const formSubmit = (e) => {
+    e.preventDefault();
+    if (newCategoryName) {
+      onUpdate(editCategory, newCategoryName);
+      handleCloseModal();
+    }setEditCategory('');
+    setTimeout(() => {
+      setShowModal(false);
+    }, 500);
+  };
+
+ 
 
   return (
     <div>
@@ -30,7 +46,7 @@ const edit_category = (category) => {
             <tr key={category}>
               <td>{category}</td>
               <td>
-                <button onClick={() => edit_category(category)}>Edit</button> 
+                <button onClick={() => handleShowModal(category)}>Edit</button>
                 <button onClick={() => onDelete(category)}>Delete</button>
               </td>
             </tr>
@@ -39,23 +55,24 @@ const edit_category = (category) => {
       </table>
 
       {editCategory && (
-        <div>
-          <h3>Edit Category</h3>
-          <form>
-            <label>Category:</label>
-            <input
-              type="text"
-              name="name"
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              required
-            />
-
-            <button type="button" onClick={update_category}>
-              Update Category
-            </button>
-          </form>
-        </div>
+        <Modal show={showModal} onHide={handleCloseModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Edit Category</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <form onSubmit={formSubmit}>
+              <input
+                type="text"
+                name="name"
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                required
+              />
+              <button type="submit">Update Category</button>
+            
+            </form>
+          </Modal.Body>
+        </Modal>
       )}
     </div>
   );
