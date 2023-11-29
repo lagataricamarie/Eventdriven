@@ -3,12 +3,13 @@ import React, { useState } from 'react';
 const TransactionManagement = ({ products = [], setProducts }) => {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
-  const [showPaymentOptions, setShowPaymentOptions] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
-  const [isCashOnDeliverySelected, setIsCashOnDeliverySelected] = useState(false);
+  const [cartId, setCartId] = useState(1);
+  const [PaymentOptions, setPaymentOptions] = useState(false);
+  const [PaymentMethod, setPaymentMethod] = useState('');
+  const [CashOnDeliverySelected, setCashOnDeliverySelected] = useState(false);
   const [cashOnDeliveryDetails, setCashOnDeliveryDetails] = useState({
     fullName: '',
-    shippingAddress: '',
+    CompleteAddress: '',
     contactNumber: ''
   });
 
@@ -16,20 +17,34 @@ const TransactionManagement = ({ products = [], setProducts }) => {
   
   const addToCart = (productId) => {
     const productToAdd = products.find(product => product.id === productId);
-    if (productToAdd) {
-      const updatedCart = [...cart, productToAdd];
+    if (productToAdd && productToAdd.stock > 0) {
+      const updatedCart = [
+        ...cart,
+        {
+          ...productToAdd,
+          cartId: cartId // auto-increment ID
+        }
+      ];
       setCart(updatedCart);
+      setCartId(cartId + 1); // Increment ID for the next product
       updateTotal(updatedCart);
       updateProductQuantity(productId, -1); // Decrease product quantity by 1 after adding to cart
+    } else {
+      alert('This product is out of stock.');
     }
   };
 
-  const removeFromCart = (productId) => {
-    const updatedCart = cart.filter(product => product.id !== productId);
+  
+  const removeFromCart = (cartIdToRemove) => {
+    const updatedCart = cart.filter(product => product.cartId !== cartIdToRemove);
     setCart(updatedCart);
+    const removedProduct = cart.find(product => product.cartId === cartIdToRemove); // Retrieve the product that was removed from the cart
+    if (removedProduct) {
+      updateProductQuantity(removedProduct.id, 1); // Increase the stock of the removed product 
+    }
     updateTotal(updatedCart);
-    updateProductQuantity(productId, 1); // Increase product quantity by 1 after removing from cart
   };
+
 
   const updateTotal = (updatedCart) => {
     const totalPrice = updatedCart.reduce((acc, product) => acc + parseFloat(product.price), 0);
@@ -37,61 +52,34 @@ const TransactionManagement = ({ products = [], setProducts }) => {
   };
 
   const updateProductQuantity = (productId, quantityChange) => {
-    // Update the product quantity in your products state
-    // This function should ideally update the quantity of the selected product in the main products list
-    // For simplicity, this example assumes a product has a "quantity" field
     const updatedProducts = products.map(product =>
       product.id === productId ? { ...product, stock: product.stock + quantityChange } : product
     );
-    // Set the updated products list (this will update your ProductManagement component's products)
-    // setProducts(updatedProducts); // You'd have this function in your ProductManagement component
+    setProducts(updatedProducts);
   };
-
   
-
   const handleCheckout = () => {
     if (cart.length === 0) {
       alert('Please add products to the cart before checking out!');
     } else {
-      // Calculate total price, update cart and other operations...
-
-      // Update stock for purchased products
-      if (Array.isArray(products) && products.length > 0) {
-        const updatedProducts = products.map(product => {
-          const cartProduct = cart.find(cartItem => cartItem.id === product.id);
-          if (cartProduct) {
-            const remainingStock = product.stock - 1; // Reduce by 1 for each purchased item
-            return { ...product, stock: remainingStock >= 0 ? remainingStock : 0 };
-          }
-          return product;
-        });
-
-        // Update the products list with reduced stock
-        setProducts(updatedProducts);
-        setCart([]); // Clear the cart after checkout
-        setShowPaymentOptions(true); // Display payment options after checkout
-      } else {
-        console.error('Products array is not properly initialized or empty.');
-      }
+      setPaymentOptions(true); // Display payment options after checkout
     }
   };
 
 
   const handlePaymentSelection = (paymentType) => {
-    setShowPaymentOptions(true); 
-    setSelectedPaymentMethod(paymentType); 
-  
-    
-    setIsCashOnDeliverySelected(paymentType === 'Cash on Delivery');
+    setPaymentOptions(true); 
+    setPaymentMethod(paymentType); 
+    setCashOnDeliverySelected(paymentType === 'Cash on Delivery');
 
     if (paymentType == 'Pay Online') {
       printPurchaseDetailsOnline();
     }
   };
   
+
   const handleCashOnDeliverySubmit = (e) => {
     e.preventDefault();
-
     if (
       cashOnDeliveryDetails.fullName.trim() === '' ||
       cashOnDeliveryDetails.shippingAddress.trim() === '' ||
@@ -104,10 +92,10 @@ const TransactionManagement = ({ products = [], setProducts }) => {
     }
   };
 
-  const printPurchaseDetails = () => {
-    const paymentDetails = `Payment Method: ${selectedPaymentMethod}`;
-    const additionalMessage = 'fsfhbsdbbfegeabchay this is a message';
 
+  const printPurchaseDetails = () => {
+    const paymentDetails = `Payment Method: ${PaymentMethod}`;
+    const additionalMessage = 'fsfhbsdbbfegeabchay this is a message';
     const printContent = document.getElementById('print-content');
     if (printContent) {
       const printWindow = window.open('', '_blank');
@@ -121,10 +109,9 @@ const TransactionManagement = ({ products = [], setProducts }) => {
 
  
   const printPurchaseDetailsOnline = () => {
-    const paymentDetails = `Online Payment`;
-    const additionalMessage = 'To send and confirm your payment, please send us your proof of payment via email at @gizmogliztfinance@gmail.com. Thank you for your purchased.'; 
-  
-    const printContent = document.getElementById('print-content');
+    const paymentDetails = 'Online Payment';
+    const additionalMessage = 'To confirm your payment, please send us your proof of payment via email at @gizmogliztfinance@gmail.com. Thank you for your purchased.'; 
+    const printContent = document.getElementById('printContent');
     if (printContent) {
       const printWindow = window.open('', '_blank');
       printWindow.document.write(
@@ -134,13 +121,45 @@ const TransactionManagement = ({ products = [], setProducts }) => {
       printWindow.print();
     }
   };
+
+
+  const handlePaymentCompleted = () => {
+    if (!PaymentMethod || PaymentMethod === '') {
+      alert('Please select a payment method before completing the payment.');
+      return;
+    }
+    if (CashOnDeliverySelected && !cashOnDeliveryDetails.fullName.trim()) {
+      alert('Please provide your full name for Cash on Delivery.');
+      return;
+    }
+    if (CashOnDeliverySelected && !cashOnDeliveryDetails.shippingAddress.trim()) {
+      alert('Please provide your shipping address for Cash on Delivery.');
+      return;
+    }
+    if (CashOnDeliverySelected && !cashOnDeliveryDetails.contactNumber.trim()) {
+      alert('Please provide your contact number for Cash on Delivery.');
+      return;
+    }
+    // Reset the state variables to their initial values
+    setCart([]);
+    setTotal(0);
+    setPaymentOptions(false);
+    setPaymentMethod('');
+    setCashOnDeliverySelected(false);
+    setCashOnDeliveryDetails({
+      fullName: '',
+      shippingAddress: '',
+      contactNumber: '',
+    });
+  };
+
   
 
   return (
     <div>
-    <h2>Point of Sale (POS)</h2>
+    <h4>Product Transaction (Point of Sale)</h4>
     <div>
-      <h3>Cart</h3>
+      <h5>Cart</h5>
       <table>
         <thead>
           <tr>
@@ -155,14 +174,14 @@ const TransactionManagement = ({ products = [], setProducts }) => {
               <td>{product.name}</td>
               <td>${product.price}</td>
               <td>
-              <button onClick={() => removeFromCart(product.id)}>Remove</button>
+              <button onClick={() => removeFromCart(product.cartId)}>Remove</button>
               <button onClick={handleCheckout}>Checkout</button>
               </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {showPaymentOptions && (
+        {PaymentOptions && (
           <div>
             <h3>Payment Options</h3>
             <p>Total: ${total}</p>
@@ -171,12 +190,14 @@ const TransactionManagement = ({ products = [], setProducts }) => {
               <h4>Choose Payment Method</h4>
               <button onClick={() => handlePaymentSelection('Cash on Delivery')}>Cash on Delivery</button>
               <button onClick={() => handlePaymentSelection('Pay Online')}>Pay Online</button>
+              <button onClick={handlePaymentCompleted}>Complete Payment</button>
             </div>
+            
           </div>
         )}
       </div>
 
-      {isCashOnDeliverySelected && (
+      {CashOnDeliverySelected && (
         <div>
           <h3>Provide Details for Cash on Delivery</h3>
           <form onSubmit={handleCashOnDeliverySubmit}>
@@ -190,8 +211,8 @@ const TransactionManagement = ({ products = [], setProducts }) => {
             />
             <input
               type="text"
-              placeholder="Shipping Address"
-              value={cashOnDeliveryDetails.shippingAddress}
+              placeholder="Complete Address"
+              value={cashOnDeliveryDetails.CompleteAddress}
               onChange={(e) =>
                 setCashOnDeliveryDetails({
                   ...cashOnDeliveryDetails,
@@ -200,7 +221,7 @@ const TransactionManagement = ({ products = [], setProducts }) => {
               }
             />
             <input
-              type="text"
+              type="number"
               placeholder="Contact Number"
               value={cashOnDeliveryDetails.contactNumber}
               onChange={(e) =>
@@ -215,7 +236,7 @@ const TransactionManagement = ({ products = [], setProducts }) => {
         </div>
       )}
 
-     <div id="print-content" style={{ display: 'none' }}>
+     <div id="printContent" style={{ display: 'none' }}>
         <h2>Purchase Receipt</h2>
         <p>Total: ${total}</p>
         <h3>Products Purchased:</h3>
@@ -230,7 +251,7 @@ const TransactionManagement = ({ products = [], setProducts }) => {
             {cart.map(product => (
               <tr key={product.id}>
                 <td>{product.name}</td>
-                <td>${product.price}</td>
+                <td>₱{product.price}</td>
               </tr>
             ))}
           </tbody>
@@ -252,7 +273,7 @@ const TransactionManagement = ({ products = [], setProducts }) => {
             {availableProducts.map(product => (
               <tr key={product.id}>
                 <td>{product.name}</td>
-                <td>${product.price}</td>
+                <td>₱{product.price}</td>
                 <td>{product.stock}</td>
                 <td>
                   <button onClick={() => addToCart(product.id)}>Add to Cart</button>

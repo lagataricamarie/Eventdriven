@@ -9,7 +9,7 @@ const Category_List = ({ categories, onDelete, onUpdate }) => {
   const handleShowModal = (category) => {
     setShowModal(true);
     setEditCategory(category);
-    setNewCategoryName(category); // Initialize the input with the current category name
+    setNewCategoryName(category); 
   };
 
   const handleCloseModal = () => {

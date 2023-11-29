@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { Modal } from 'react-bootstrap';
 
 const Product_List = ({ products, categories, onUpdate, onDelete }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [editProduct, setEditProduct] = useState({
     id: '',
     name: '',
@@ -10,21 +13,6 @@ const Product_List = ({ products, categories, onUpdate, onDelete }) => {
   });
 
   const [selectedCategory, setSelectedCategory] = useState('');
-
-   const edit_product = (product) => {
-    setEditProduct(product);
-  };
-
-  const update_product = () => {
-    onUpdate(editProduct);
-    setEditProduct({
-      id: '',
-      name: '',
-      price: '',
-      stock: '',
-      category: '',
-    });
-  };
 
   const category_counts = () => {
     const counts = {};
@@ -43,6 +31,43 @@ const Product_List = ({ products, categories, onUpdate, onDelete }) => {
   const filtered_products = selectedCategory
     ? products.filter((product) => product.category === selectedCategory)
     : products;
+
+  const handleShowModal = (product) => {
+    setShowModal(true);
+    setEditProduct(product);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditProduct('');
+  };
+
+
+  const formSubmit = (e) => {
+    e.preventDefault();
+  
+    const { name, price, stock, category } = editProduct;
+  
+    if (!(name && price && stock && category)) {
+      setShowAlert(true);
+      return;
+    }
+  
+    onUpdate(editProduct, setEditProduct);
+    handleCloseModal();
+    setEditProduct({
+      id: '',
+      name: '',
+      price: '',
+      stock: '',
+      category: '',
+    });
+    setShowAlert(false);
+    setTimeout(() => {
+      setShowModal(false);
+    }, 500);
+  };
+  
 
   return (
     <div>
@@ -99,7 +124,7 @@ const Product_List = ({ products, categories, onUpdate, onDelete }) => {
               <td>{product.stock}</td>
               <td>{product.category}</td>
               <td>
-                <button onClick={() => edit_product(product)}>Edit</button>
+                <button onClick={() => handleShowModal(product)}>Edit</button>
                 <button onClick={() => onDelete(product.id)}>Delete</button>
               </td>
             </tr>
@@ -108,9 +133,12 @@ const Product_List = ({ products, categories, onUpdate, onDelete }) => {
       </table>
 
       {editProduct.id && (
-        <div>
-          <h3>Edit Product</h3>
-          <form>
+        <Modal show={showModal} onHide={handleCloseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Update Product</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <form onSubmit={formSubmit}>
             <label>Name:</label>
             <input
               type="text"
@@ -144,11 +172,17 @@ const Product_List = ({ products, categories, onUpdate, onDelete }) => {
               ))}
             </select>
 
-            <button type="button" onClick={update_product}>
+            <button type="button" onClick={formSubmit}>
               Update Product
             </button>
           </form>
-        </div>
+          {showAlert && (
+            <div className=" alert text-danger" role="alert">
+              Please fill in all fields before updating.
+            </div>
+          )}
+          </Modal.Body>
+        </Modal>
       )}
     </div>
   );

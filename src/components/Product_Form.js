@@ -17,7 +17,7 @@ const Product_Form = ({ onSubmit, categories }) => {
   
   const handleShowModal = () => {
     setShowModal(true);
-    setSuccessMessage(false); // Reset success message when modal opens
+    setSuccessMessage(false); 
   };
 
   const handleCloseModal = () => setShowModal(false);
@@ -30,11 +30,11 @@ const Product_Form = ({ onSubmit, categories }) => {
     e.preventDefault();
     onSubmit(product);
     setProduct({ id: '', name: '', price: '', stock: '', category: '' });
-    setSuccessMessage(true); // Show success message after submission
+    setSuccessMessage(true); 
     setTimeout(() => {
-      setSuccessMessage(false); // Hide the success message after a delay
-      handleCloseModal(); // Close the modal after hiding the message
-    }, 500); // Adjust the duration as needed
+      setSuccessMessage(false); 
+      handleCloseModal(); 
+    }, 500); 
   };
 
 
@@ -92,7 +92,7 @@ const Product_Form = ({ onSubmit, categories }) => {
       <button type="submit">Add</button>
     </form>
     {SuccessMessage && (
-          <p style={{ color: 'green' }}>Product added successfully!</p>
+          <p style={{ color: 'green' }}> Product added successfully!</p>
         )}
       </Modal.Body>
     </Modal>

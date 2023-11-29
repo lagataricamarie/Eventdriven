@@ -9,7 +9,7 @@ const Stock_Form = ({ products, onUpdateStock }) => {
 
   const handleShowModal = () => {
     setShowModal(true);
-    setUpdateSuccess(false); // Reset success message when modal opens
+    setUpdateSuccess(false); 
   };
 
   const handleCloseModal = () => setShowModal(false);
@@ -25,16 +25,14 @@ const Stock_Form = ({ products, onUpdateStock }) => {
   const form_submit = (e) => {
     e.preventDefault();
 
-    const product = products.find((p) => p.id === selectedProduct);
+  const product = products.find((p) => p.id === selectedProduct);
 
     if (product) {
       onUpdateStock(product.id, parseInt(newStock, 10));
-      setUpdateSuccess(true); // Set success message to true after update
+      setUpdateSuccess(true); 
     }
-
     setSelectedProduct('');
     setNewStock('');
-    // Close the modal after submitting (with a delay for displaying the success message)
     setTimeout(() => {
       setShowModal(false);
     }, 500);
@@ -42,7 +40,6 @@ const Stock_Form = ({ products, onUpdateStock }) => {
   return (
     <>
     <Button onClick={handleShowModal}>Update Stock</Button>
-
     <Modal show={showModal} onHide={handleCloseModal}>
       <Modal.Header closeButton>
         <Modal.Title>Update Stock</Modal.Title>

@@ -8,7 +8,7 @@ const Category_Form = ({ onSubmit,}) => {
 
   const handleShowModal = () => {
     setShowModal(true);
-    setAddSuccess(false); // Reset success message when modal opens
+    setAddSuccess(false); 
   };
 
   const handleCloseModal = () => setShowModal(false);
@@ -22,7 +22,7 @@ const Category_Form = ({ onSubmit,}) => {
 
     if (category) {
       onSubmit(category);
-      setAddSuccess(true); // Set success message to true after update
+      setAddSuccess(true); 
     }
     setCategory('');
     setTimeout(() => {

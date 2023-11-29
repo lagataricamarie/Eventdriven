@@ -124,8 +124,8 @@ const App = () => {
          {activeTab === 'transaction' && (
           <div>
             <h2>Transaction Management</h2>
-            <TransactionManagement products={products}  setProducts={setProducts}  />
-            <TransactionManagement handleAddToCart={handleAddToCart}  />
+            <TransactionManagement products={products}  setProducts={setProducts} handleAddToCart={handleAddToCart}  />
+      
 
           </div>
         )}
