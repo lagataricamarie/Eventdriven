@@ -27,8 +27,14 @@ const TransactionManagement = ({ products = [], setProducts }) => {
       ];
       setCart(updatedCart);
       setCartId(cartId + 1); // Increment ID for the next product
+  
+      // Create a copy of the products array and modify the stock of the specific product
+      const updatedProducts = products.map(product =>
+        product.id === productId ? { ...product, stock: product.stock - 1 } : product
+      );
+  
+      setProducts(updatedProducts); // Update the products with reduced stock
       updateTotal(updatedCart);
-      updateProductQuantity(productId, -1); // Decrease product quantity by 1 after adding to cart
     } else {
       alert('This product is out of stock.');
     }
@@ -53,7 +59,7 @@ const TransactionManagement = ({ products = [], setProducts }) => {
 
   const updateProductQuantity = (productId, quantityChange) => {
     const updatedProducts = products.map(product =>
-      product.id === productId ? { ...product, stock: product.stock + quantityChange } : product
+      product.id === productId ? { ...product, stock: (Number.isNaN(product.stock) ? 0 : product.stock) + quantityChange } : product
     );
     setProducts(updatedProducts);
   };
