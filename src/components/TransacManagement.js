@@ -22,18 +22,18 @@ const TransactionManagement = ({ products = [], setProducts }) => {
         ...cart,
         {
           ...productToAdd,
-          cartId: cartId // auto-increment ID
+          cartId: cartId 
         }
       ];
       setCart(updatedCart);
-      setCartId(cartId + 1); // Increment ID for the next product
+      setCartId(cartId + 1); 
   
-      // Create a copy of the products array and modify the stock of the specific product
+      
       const updatedProducts = products.map(product =>
         product.id === productId ? { ...product, stock: product.stock - 1 } : product
       );
   
-      setProducts(updatedProducts); // Update the products with reduced stock
+      setProducts(updatedProducts); 
       updateTotal(updatedCart);
     } else {
       alert('This product is out of stock.');
